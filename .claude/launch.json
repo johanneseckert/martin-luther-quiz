@@ -1,9 +1,17 @@
 {
+  "version": "0.0.1",
   "configurations": [
     {
       "name": "Dev Server",
-      "command": "npm run dev",
-      "url": "http://localhost:5173/martin-luther-quiz/"
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "Preview (production build)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview"],
+      "port": 4173
     }
   ]
 }
