@@ -364,6 +364,9 @@ export default function MartinLutherQuiz() {
                   {score} / {QUESTIONS_PER_ROUND}
                 </div>
                 <div className="mt-2 text-lg text-slate-700">{percentage}% richtig</div>
+                {score <= 3 && (
+                  <p className="mt-3 text-sm text-slate-500">Schade, probiere es noch einmal!</p>
+                )}
                 <div className="mt-4 flex gap-1.5">
                   {results.map((r, i) => (
                     <div
