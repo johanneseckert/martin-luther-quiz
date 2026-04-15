@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import confetti from "canvas-confetti";
 import { CheckCircle2, XCircle, Shuffle, Trophy, BookOpen, ArrowRight } from "lucide-react";
 
 const QUESTION_POOL = [
@@ -323,6 +324,17 @@ export default function MartinLutherQuiz() {
     setIsFinished(false);
     setResults(Array(QUESTIONS_PER_ROUND).fill(null));
   };
+
+  useEffect(() => {
+    if (!isFinished || score !== QUESTIONS_PER_ROUND) return;
+    const end = Date.now() + 2500;
+    const frame = () => {
+      confetti({ particleCount: 6, angle: 60, spread: 55, origin: { x: 0 } });
+      confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 } });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    };
+    frame();
+  }, [isFinished, score]);
 
   if (isFinished) {
     const percentage = Math.round((score / QUESTIONS_PER_ROUND) * 100);
