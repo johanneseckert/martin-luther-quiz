@@ -468,11 +468,11 @@ export default function MartinLutherQuiz() {
             {hasAnswered && (
               <div
                 className={`rounded-2xl p-4 ${
-                  selectedIndex === currentQuestion.answer ? "bg-green-50" : "bg-red-50"
+                  results[currentIndex] === true ? "bg-green-50" : "bg-red-50"
                 }`}
               >
                 <div className="mb-2 flex items-center gap-2 font-semibold">
-                  {selectedIndex === currentQuestion.answer ? (
+                  {results[currentIndex] === true ? (
                     <>
                       <CheckCircle2 className="h-5 w-5 text-green-700" />
                       <span className="text-green-800">Richtig</span>
