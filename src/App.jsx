@@ -60,7 +60,7 @@ const QUESTION_POOL = [
     question: "Welche Sprache mussten alle Kinder in der Schule in Magdeburg sprechen?",
     options: ["Deutsch", "Latein", "Griechisch", "Hebräisch"],
     answer: 1,
-    explanation: "Im Text steht: „In dieser Schule mussten alle Kinder Latein sprechen." Das war damals an solchen Schulen üblich."
+    explanation: "Im Text steht: ‚In dieser Schule mussten alle Kinder Latein sprechen.' Das war damals an solchen Schulen üblich."
   },
   {
     question: "Wer ging damals laut Text in die Schule?",
@@ -284,20 +284,22 @@ export default function MartinLutherQuiz() {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
+  // null = not yet answered, true = correct, false = wrong
+  const [results, setResults] = useState(() => Array(QUESTIONS_PER_ROUND).fill(null));
 
   const currentQuestion = roundQuestions[currentIndex];
-  const progress = useMemo(
-    () => ((currentIndex + (isFinished ? 1 : 0)) / QUESTIONS_PER_ROUND) * 100,
-    [currentIndex, isFinished]
-  );
 
   const handleAnswer = (index) => {
     if (hasAnswered || isFinished) return;
+    const correct = index === currentQuestion.answer;
     setSelectedIndex(index);
     setHasAnswered(true);
-    if (index === currentQuestion.answer) {
-      setScore((prev) => prev + 1);
-    }
+    if (correct) setScore((prev) => prev + 1);
+    setResults((prev) => {
+      const next = [...prev];
+      next[currentIndex] = correct;
+      return next;
+    });
   };
 
   const handleNextQuestion = () => {
@@ -319,6 +321,7 @@ export default function MartinLutherQuiz() {
     setSelectedIndex(null);
     setHasAnswered(false);
     setIsFinished(false);
+    setResults(Array(QUESTIONS_PER_ROUND).fill(null));
   };
 
   if (isFinished) {
@@ -343,6 +346,14 @@ export default function MartinLutherQuiz() {
                   {score} / {QUESTIONS_PER_ROUND}
                 </div>
                 <div className="mt-2 text-lg text-slate-700">{percentage}% richtig</div>
+                <div className="mt-4 flex gap-1.5">
+                  {results.map((r, i) => (
+                    <div
+                      key={i}
+                      className={`h-3 flex-1 rounded-full ${r === true ? "bg-green-500" : "bg-red-500"}`}
+                    />
+                  ))}
+                </div>
               </div>
               <button
                 onClick={startNewRound}
@@ -381,12 +392,18 @@ export default function MartinLutherQuiz() {
                 <div className="text-2xl font-bold text-slate-900">{score}</div>
               </div>
             </div>
-            {/* Progress bar */}
-            <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200">
-              <div
-                className="h-full rounded-full bg-slate-900 transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
+            {/* Progress segments */}
+            <div className="flex gap-1.5">
+              {Array.from({ length: QUESTIONS_PER_ROUND }).map((_, i) => {
+                const isCurrent = !isFinished && i === currentIndex;
+                const result = results[i];
+                let cls = "h-3 flex-1 rounded-full transition-colors duration-300 ";
+                if (result === true) cls += "bg-green-500";
+                else if (result === false) cls += "bg-red-500";
+                else if (isCurrent) cls += "bg-slate-900";
+                else cls += "bg-slate-200";
+                return <div key={i} className={cls} />;
+              })}
             </div>
           </div>
 
