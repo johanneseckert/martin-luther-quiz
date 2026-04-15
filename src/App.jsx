@@ -280,6 +280,9 @@ function getRoundQuestions() {
 
 export default function MartinLutherQuiz() {
   const [roundQuestions, setRoundQuestions] = useState(() => getRoundQuestions());
+  const [shuffledOrders, setShuffledOrders] = useState(() =>
+    Array.from({ length: QUESTIONS_PER_ROUND }, () => shuffle([0, 1, 2, 3]))
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(null);
@@ -289,11 +292,13 @@ export default function MartinLutherQuiz() {
   const [results, setResults] = useState(() => Array(QUESTIONS_PER_ROUND).fill(null));
 
   const currentQuestion = roundQuestions[currentIndex];
+  const currentOrder = shuffledOrders[currentIndex]; // e.g. [2, 0, 3, 1]
 
-  const handleAnswer = (index) => {
+  const handleAnswer = (displayIdx) => {
     if (hasAnswered || isFinished) return;
-    const correct = index === currentQuestion.answer;
-    setSelectedIndex(index);
+    const origIdx = currentOrder[displayIdx];
+    const correct = origIdx === currentQuestion.answer;
+    setSelectedIndex(displayIdx);
     setHasAnswered(true);
     if (correct) setScore((prev) => prev + 1);
     setResults((prev) => {
@@ -317,6 +322,7 @@ export default function MartinLutherQuiz() {
 
   const startNewRound = () => {
     setRoundQuestions(getRoundQuestions());
+    setShuffledOrders(Array.from({ length: QUESTIONS_PER_ROUND }, () => shuffle([0, 1, 2, 3])));
     setCurrentIndex(0);
     setScore(0);
     setSelectedIndex(null);
@@ -327,10 +333,10 @@ export default function MartinLutherQuiz() {
 
   useEffect(() => {
     if (!isFinished || score !== QUESTIONS_PER_ROUND) return;
-    const end = Date.now() + 2500;
+    const end = Date.now() + 1500;
     const frame = () => {
-      confetti({ particleCount: 6, angle: 60, spread: 55, origin: { x: 0 } });
-      confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 } });
+      confetti({ particleCount: 3, angle: 60, spread: 45, origin: { x: 0 }, gravity: 1.2 });
+      confetti({ particleCount: 3, angle: 120, spread: 45, origin: { x: 1 }, gravity: 1.2 });
       if (Date.now() < end) requestAnimationFrame(frame);
     };
     frame();
@@ -425,9 +431,10 @@ export default function MartinLutherQuiz() {
             </h2>
 
             <div className="grid gap-3">
-              {currentQuestion.options.map((option, index) => {
-                const isSelected = selectedIndex === index;
-                const isCorrect = index === currentQuestion.answer;
+              {currentOrder.map((origIdx, displayIdx) => {
+                const option = currentQuestion.options[origIdx];
+                const isSelected = selectedIndex === displayIdx;
+                const isCorrect = origIdx === currentQuestion.answer;
 
                 let cls =
                   "flex w-full items-start gap-3 rounded-2xl border px-4 py-4 text-left text-base transition-colors";
@@ -446,12 +453,12 @@ export default function MartinLutherQuiz() {
 
                 return (
                   <button
-                    key={`${currentIndex}-${index}`}
+                    key={`${currentIndex}-${displayIdx}`}
                     className={cls}
-                    onClick={() => handleAnswer(index)}
+                    onClick={() => handleAnswer(displayIdx)}
                     disabled={hasAnswered}
                   >
-                    <span className="font-semibold shrink-0">{String.fromCharCode(65 + index)}.</span>
+                    <span className="font-semibold shrink-0">{String.fromCharCode(65 + displayIdx)}.</span>
                     <span>{option}</span>
                   </button>
                 );
